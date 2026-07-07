@@ -1,0 +1,25 @@
+[package]
+name = "nido"
+version = "0.1.0"
+edition = "2021"
+description = "Declarative, idempotent dotfiles + packages + secrets manager. Rebuild your whole setup on a clean machine with one command."
+license = "MIT"
+repository = "https://github.com/harpeblue/nido"
+keywords = ["dotfiles", "bootstrap", "symlink", "provisioning"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+toml_edit = "0.22"
+age = "0.11"
+dialoguer = "0.11"
+owo-colors = "4"
+dirs = "5"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
