@@ -32,13 +32,21 @@ main() {
 }
 
 build_from_source() {
-    if ! command -v cargo >/dev/null 2>&1; then
-        echo "error: no prebuilt binary and cargo not found." >&2
-        echo "install rust (https://rustup.rs) and re-run, or download a binary from" >&2
-        echo "https://github.com/$REPO/releases" >&2
+    # a C linker is required to build Rust code
+    if ! command -v cc >/dev/null 2>&1; then
+        echo "error: no C compiler found. On Ubuntu/Debian run:" >&2
+        echo "    sudo apt install -y build-essential curl git" >&2
+        echo "then re-run this script." >&2
         exit 1
     fi
+    if ! command -v cargo >/dev/null 2>&1; then
+        # distro cargo is often too old (Ubuntu 24.04 ships 1.75); use rustup
+        echo "installing rust via rustup (minimal profile)..."
+        curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
+        . "$HOME/.cargo/env"
+    fi
     cargo install --git "https://github.com/$REPO" --locked
+    echo "installed to $HOME/.cargo/bin/nido (open a new shell if not found)"
 }
 
 main "$@"
