@@ -3,7 +3,7 @@
 # source with cargo if no binary matches this platform.
 set -eu
 
-REPO="harpeblue/nido"
+REPO="itsplenum/nido"
 INSTALL_DIR="${NIDO_INSTALL_DIR:-$HOME/.local/bin}"
 
 main() {

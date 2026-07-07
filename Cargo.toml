@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Declarative, idempotent dotfiles + packages + secrets manager. Rebuild your whole setup on a clean machine with one command."
 license = "MIT"
-repository = "https://github.com/harpeblue/nido"
+repository = "https://github.com/itsplenum/nido"
 keywords = ["dotfiles", "bootstrap", "symlink", "provisioning"]
 categories = ["command-line-utilities"]
 

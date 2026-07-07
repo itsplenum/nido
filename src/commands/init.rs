@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 const TEMPLATE: &str = r#"# nido manifest — the declarative description of your machine.
-# Docs: https://github.com/harpeblue/nido
+# Docs: https://github.com/itsplenum/nido
 #
 # Modules group config files. Paths are relative to $HOME; the real file
 # lives at modules/<name>/<path> in this repo and ~/<path> becomes a symlink.

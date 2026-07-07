@@ -3,7 +3,7 @@
 Declarative dotfiles + packages + secrets manager. Rebuild your whole setup on a clean machine with one command.
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/harpeblue/nido/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/itsplenum/nido/main/install.sh | sh
 nido init git@github.com:you/dotfiles.git
 nido apply
 ```
@@ -94,7 +94,7 @@ Linux with pacman (Arch & derivatives) or apt (Debian, Ubuntu & derivatives). Th
 ## Build from source
 
 ```sh
-cargo install --git https://github.com/harpeblue/nido
+cargo install --git https://github.com/itsplenum/nido
 ```
 
 ## License
