@@ -5,6 +5,53 @@ use anyhow::{Context, Result};
 use owo_colors::OwoColorize;
 use std::path::PathBuf;
 
+/// `nido secret apply` — decrypt only the secrets, touching nothing else.
+/// This is the minimal fresh-machine path: get your SSH keys working and
+/// build the rest of the system from scratch.
+pub fn apply(dry: bool) -> Result<()> {
+    let config = Config::load()?;
+    let manifest = Manifest::load(&config.repo)?;
+    if manifest.secrets.files.is_empty() {
+        println!("no secrets declared in the manifest");
+        return Ok(());
+    }
+    apply_files(&manifest, &config, dry)
+}
+
+/// Shared by `apply` and `secret apply`.
+pub fn apply_files(manifest: &Manifest, config: &Config, dry: bool) -> Result<()> {
+    if dry {
+        println!(
+            "{} would decrypt {} secret(s): {}",
+            "→".cyan(),
+            manifest.secrets.files.len(),
+            manifest
+                .secrets
+                .files
+                .iter()
+                .map(|p| format!("~/{}", p.display()))
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
+        return Ok(());
+    }
+    let pass = secrets::passphrase(false)?;
+    for rel in &manifest.secrets.files {
+        let encrypted_path = Manifest::secret_file(&config.repo, rel);
+        let ciphertext = std::fs::read(&encrypted_path)
+            .with_context(|| format!("missing encrypted secret {}", encrypted_path.display()))?;
+        let plaintext = secrets::decrypt(&ciphertext, &pass)?;
+        let dest = paths::from_home_relative(rel)?;
+        if std::fs::read(&dest).map(|cur| cur == plaintext).unwrap_or(false) {
+            println!("{} ~/{} already up to date", "✓".green(), rel.display());
+            continue;
+        }
+        secrets::write_secret(&dest, &plaintext)?;
+        println!("{} ~/{} decrypted (0600)", "✓".green(), rel.display());
+    }
+    Ok(())
+}
+
 /// `nido secret add` — encrypt a file into the repo. The original stays in
 /// place untouched (it's your live key); `apply` on another machine recreates
 /// it with 0600 permissions.

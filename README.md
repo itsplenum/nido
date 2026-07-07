@@ -10,6 +10,14 @@ nido apply
 
 That's it: your packages installed, your configs symlinked, your SSH keys decrypted.
 
+Prefer a truly fresh start? Restore only your secrets and build the rest from zero, adopting configs as you create them:
+
+```sh
+nido secret apply      # just your SSH keys, nothing else
+nido add ~/.config/foo --module foo   # adopt new configs as you go
+nido sync              # one-command commit + push
+```
+
 ## Why
 
 Every reinstall you lose hours rebuilding the same environment. nido turns your setup into a **declarative manifest** in a git repo — a single source of truth describing what your machine should look like — and makes any machine converge to it, **idempotently** (running `apply` twice changes nothing the second time).
@@ -71,7 +79,9 @@ files = [".ssh/id_ed25519", ".ssh/id_ed25519.pub", ".ssh/config"]
 | `nido pkg snapshot [-g group] [-t tags]` | Capture installed packages into the manifest |
 | `nido pkg list` | Show wanted vs installed for this machine |
 | `nido secret add <files>` | Encrypt secrets into the repo |
+| `nido secret apply` | Decrypt only the secrets (minimal fresh-machine path) |
 | `nido status` | Drift report: broken links, missing packages, dirty repo |
+| `nido sync [-m msg]` | Commit + push the repo in one step |
 
 Automation: set `NIDO_PASSPHRASE` to skip the interactive secrets prompt (CI, containers).
 

@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::manifest::Manifest;
-use crate::{paths, pkg, secrets, symlink};
-use anyhow::{Context, Result};
+use crate::{paths, pkg, symlink};
+use anyhow::Result;
 use owo_colors::OwoColorize;
 
 pub struct Options {
@@ -27,7 +27,7 @@ pub fn run(opts: Options) -> Result<()> {
     }
     links(&manifest, &config, &opts)?;
     if !opts.skip_secrets && !manifest.secrets.files.is_empty() {
-        apply_secrets(&manifest, &config, dry)?;
+        super::secret::apply_files(&manifest, &config, dry)?;
     }
 
     println!("{} apply finished", "✓".green());
@@ -99,35 +99,3 @@ fn links(manifest: &Manifest, config: &Config, opts: &Options) -> Result<()> {
     Ok(())
 }
 
-fn apply_secrets(manifest: &Manifest, config: &Config, dry: bool) -> Result<()> {
-    if dry {
-        println!(
-            "{} would decrypt {} secret(s): {}",
-            "→".cyan(),
-            manifest.secrets.files.len(),
-            manifest
-                .secrets
-                .files
-                .iter()
-                .map(|p| format!("~/{}", p.display()))
-                .collect::<Vec<_>>()
-                .join(" ")
-        );
-        return Ok(());
-    }
-    let pass = secrets::passphrase(false)?;
-    for rel in &manifest.secrets.files {
-        let encrypted_path = Manifest::secret_file(&config.repo, rel);
-        let ciphertext = std::fs::read(&encrypted_path)
-            .with_context(|| format!("missing encrypted secret {}", encrypted_path.display()))?;
-        let plaintext = secrets::decrypt(&ciphertext, &pass)?;
-        let dest = paths::from_home_relative(rel)?;
-        if std::fs::read(&dest).map(|cur| cur == plaintext).unwrap_or(false) {
-            println!("{} ~/{} already up to date", "✓".green(), rel.display());
-            continue;
-        }
-        secrets::write_secret(&dest, &plaintext)?;
-        println!("{} ~/{} decrypted (0600)", "✓".green(), rel.display());
-    }
-    Ok(())
-}

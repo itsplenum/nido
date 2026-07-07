@@ -63,6 +63,12 @@ enum Cmd {
     Secret(SecretCmd),
     /// Show drift between the manifest and this machine
     Status,
+    /// Commit and push the dotfiles repo in one step
+    Sync {
+        /// Commit message (default: auto-generated)
+        #[arg(short, long)]
+        message: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -90,6 +96,11 @@ enum SecretCmd {
         #[arg(required = true)]
         files: Vec<PathBuf>,
     },
+    /// Decrypt only the secrets — the minimal fresh-machine setup
+    Apply {
+        #[arg(long)]
+        dry_run: bool,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -113,6 +124,8 @@ fn main() -> anyhow::Result<()> {
         Cmd::Pkg(PkgCmd::Snapshot { group, tags }) => commands::pkg::snapshot(group, tags),
         Cmd::Pkg(PkgCmd::List { tags }) => commands::pkg::list(tags),
         Cmd::Secret(SecretCmd::Add { files }) => commands::secret::add(files),
+        Cmd::Secret(SecretCmd::Apply { dry_run }) => commands::secret::apply(dry_run),
         Cmd::Status => commands::status::run(),
+        Cmd::Sync { message } => commands::sync::run(message),
     }
 }
